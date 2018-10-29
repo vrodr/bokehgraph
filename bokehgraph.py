@@ -1,8 +1,8 @@
 import pandas as pd
-from bokeh.plotting import figure, output_file, show, ColumnDataSource
+from bokeh.plotting import figure, output_file, show
 import random
 import numpy as np
-
+from bokeh.models import Legend
 
 # random color for themes
 def random_color():
@@ -15,7 +15,9 @@ TOOLTIPS = [("index", "$index"),
             ("desc", "@Message")]
 
 output_file("circles.html", title="circles", mode="cdn")
-p = figure(tools=TOOLS, x_range=(-40, 40), y_range=(-40, 40), tooltips=TOOLTIPS)
+p = figure(tools=TOOLS, x_range=(-40, 40), y_range=(-40, 40), tooltips=TOOLTIPS,
+           plot_width=850, plot_height=850)
+
 
 # prepare data
 df = pd.read_csv('data/export.csv', sep=',')
@@ -32,14 +34,32 @@ df['color'] = df['Result Chat']
 df = df.replace({'color': dict_of_themes})
 
 # make noise
-mu, sigma = 0, 0.5
+mu, sigma = 0, 0.1
 df['x'] = df['x'].apply(lambda x: x + np.random.normal(mu, sigma))
 df['y'] = df['y'].apply(lambda x: x + np.random.normal(mu, sigma))
 
-source = ColumnDataSource(df)
+list_of_themes = list(dict_of_themes.keys())
+list_of_themes.sort()
 
 # build dots
-p.circle('x', 'y', fill_color='color', line_color='color', source=source)
+i = 10
+for theme in list_of_themes:
+    temp = df[df['Result Chat'] == theme]
+    r = p.circle(temp['x'].values, temp['y'].values,
+                 fill_color=temp['color'].values, line_color=temp['color'].values,
+                 legend=theme)
 
+
+
+p.legend.click_policy = "hide"
+
+
+
+'''legend = Legend(location=(100, 100))
+p.add_layout(legend, 'left')
+ legend = Legend(items=[(theme, [r])], location=(i, i), orientation="vertical")
+    #p.add_layout(legend, 'below')
+    i -= 10
+p.legend.orientation = "horizontal'''
 # show the results
 show(p)
