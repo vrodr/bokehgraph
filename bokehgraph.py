@@ -1,6 +1,7 @@
 import pandas as pd
 from bokeh.plotting import figure, output_file, show, ColumnDataSource
 import random
+import numpy as np
 
 
 # random color for themes
@@ -30,9 +31,14 @@ for ind, row in df.iterrows():
 df['color'] = df['Result Chat']
 df = df.replace({'color': dict_of_themes})
 
+# make noise
+mu, sigma = 0, 0.5
+df['x'] = df['x'].apply(lambda x: x + np.random.normal(mu, sigma))
+df['y'] = df['y'].apply(lambda x: x + np.random.normal(mu, sigma))
+
 source = ColumnDataSource(df)
 
-#build dots
+# build dots
 p.circle('x', 'y', fill_color='color', line_color='color', source=source)
 
 # show the results
