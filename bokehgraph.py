@@ -6,6 +6,9 @@ from scipy.spatial import ConvexHull
 from sklearn.metrics.cluster import adjusted_rand_score
 from bokeh.models import ColumnDataSource
 
+
+np.random.seed(5)
+
 # Random color for themes.
 def random_color():
     r = lambda: np.random.randint(0, 255)
@@ -43,15 +46,15 @@ def draw_graph(file, noise=False):
                tooltips=TOOLTIPS, plot_width=850, plot_height=850)
 
     # Prepare data.
-    if type(file) == 'pandas.core.frame.DataFrame':
-        df = file
-    else:
+    if type(file) is str:
         df = pd.read_csv(file, sep=',')
+    else:
+        df = file
     data = df[['x', 'y']].values
     clustering = DBSCAN(eps=0.1).fit(data)
     df['cluster'] = [str(element) for element in clustering.labels_]
 
-    print(adjusted_rand_score(df['Result Chat'].values, df['cluster'].values))
+    print('Adjusted Rand index: ', adjusted_rand_score(df['Result Chat'].values, df['cluster'].values))
 
     # Add 2 columns in DataFrame: color_theme and color_cluster.
     dict_of_themes = {}
